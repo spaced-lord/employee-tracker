@@ -88,23 +88,34 @@ const addEmployee = () => {
         message: "Please enter the new employees last name.",
       },
       {
-        name: "employeeManger",
-        type: "input",
+        name: "employeeManager",
+        type: "number",
         message: "Please enter the new employees manager id.",
       },
       {
         name: "employeeRole",
-        type: "input",
+        type: "number",
         message: "Please enter the new employees role.",
       },
     ])
     .then((answers) => {
-      connection.query("INSERT INTO employee SET ?", {
-        first_name: answers.employeeFirst,
-        last_name: answers.employeeLast,
-        manager_id: answers.employeeManager,
-        role_id: answers.employeeRole,
-      });
+      connection.query(
+        "INSERT INTO employee SET ?",
+        {
+          first_name: answers.employeeFirst,
+          last_name: answers.employeeLast,
+          manager_id: answers.employeeManager,
+          role_id: answers.employeeRole,
+        },
+        function (err, data) {
+          if (err) throw err;
+          connection.query("SELECT * FROM employee", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+            startingChoices();
+          });
+        }
+      );
     });
 };
 
@@ -148,12 +159,30 @@ const view = () => {
       message: "Which section would you like to view?",
     })
     .then((answer) => {
-      if (answer === "Employees") {
-        console.log("employees");
-      } else if (answer === "Department") {
-        console.log("department");
-      } else {
-        console.log("roles");
+      switch (answer.viewWhat) {
+        case "Employees":
+          connection.query("SELECT * FROM employee", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+            startingChoices();
+          });
+          break;
+        case "Department":
+          connection.query("SELECT * FROM department", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+            startingChoices();
+          });
+          break;
+        case "Roles":
+          connection.query("SELECT * FROM role", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+            startingChoices();
+          });
+          break;
+        default:
+          break;
       }
     });
 };
@@ -169,13 +198,66 @@ const update = () => {
     .then((answer) => {
       switch (answer.updateWhat) {
         case "Employees":
-          console.log(employee);
+          connection.query("SELECT * FROM employee", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+          });
+          updateEmployee();
           break;
         case "Departments":
-          console.log(departments);
+          connection.query("SELECT * FROM department", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+          });
+          updateDepartment();
           break;
         case "Roles":
-          console.log(roles);
+          connection.query("SELECT * FROM role", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+          });
+          updateRole();
+          break;
+      }
+    });
+};
+
+const updateEmployee = () => {
+  inquirer
+    .prompt({
+      name: "newUpdate",
+      type: "list",
+      message: "Which part of employee needs update?",
+      choices: ["Department", "Role", "Delete"],
+    })
+    .then((answer) => {
+      switch (answer.newUpdate) {
+        case "Department":
+          const query = connection.query(
+            "UPDATE employee SET ? WHERE ?",
+            [
+              {
+                manager_id: "",
+              },
+            ],
+            (err, data) => {
+              if (err) throw err;
+              console.log(`${data.affectedRows} has been updated`);
+            }
+          );
+          break;
+        case "Role":
+          const query = connection.query(
+            "UPDATE employee SET ? WHERE ?",
+            [{ role_id: "" }],
+            (err, data) => {
+              if (err) throw err;
+              console.log(`${data.affectedRows} has been updated`);
+            }
+          );
+          break;
+        case "Delete":
+          deleteEmployee();
           break;
       }
     });
