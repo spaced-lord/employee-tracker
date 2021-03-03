@@ -32,7 +32,7 @@ const startingChoices = () => {
           view();
           break;
         case "Update":
-          update();
+          updateEmployee();
           break;
         case "Quit":
           quit();
@@ -187,78 +187,41 @@ const view = () => {
     });
 };
 
-const update = () => {
-  inquirer
-    .prompt({
-      name: "updateWhat",
-      type: "list",
-      choices: ["Employees", "Departments", "Roles"],
-      message: "Which section would you like to update?",
-    })
-    .then((answer) => {
-      switch (answer.updateWhat) {
-        case "Employees":
-          connection.query("SELECT * FROM employee", function (err, data) {
-            if (err) throw err;
-            console.table(data);
-          });
-          updateEmployee();
-          break;
-        case "Departments":
-          connection.query("SELECT * FROM department", function (err, data) {
-            if (err) throw err;
-            console.table(data);
-          });
-          updateDepartment();
-          break;
-        case "Roles":
-          connection.query("SELECT * FROM role", function (err, data) {
-            if (err) throw err;
-            console.table(data);
-          });
-          updateRole();
-          break;
-      }
-    });
-};
+const updateEmployee = async () => {
+  const empArray = await connection.query(
+    "SELECT * FROM employee",
+    (err, res) => {
+      if (err) throw err;
+    }
+  );
 
-const updateEmployee = () => {
-  inquirer
-    .prompt({
-      name: "newUpdate",
+  const { selectEmployee } = await inquirer.prompt([
+    {
       type: "list",
-      message: "Which part of employee needs update?",
-      choices: ["Department", "Role", "Delete"],
-    })
-    .then((answer) => {
-      switch (answer.newUpdate) {
-        case "Department":
-          const query = connection.query(
-            "UPDATE employee SET ? WHERE ?",
-            [
-              {
-                manager_id: "",
-              },
-            ],
-            (err, data) => {
-              if (err) throw err;
-              console.log(`${data.affectedRows} has been updated`);
-            }
-          );
-          break;
-        case "Role":
-          const query = connection.query(
-            "UPDATE employee SET ? WHERE ?",
-            [{ role_id: "" }],
-            (err, data) => {
-              if (err) throw err;
-              console.log(`${data.affectedRows} has been updated`);
-            }
-          );
-          break;
-        case "Delete":
-          deleteEmployee();
-          break;
-      }
-    });
+      message: "Select an employee to update.",
+      choices() {
+        res.forEach(({ first_name, id }) => {
+          empArray.push({ name: first_name, value: id });
+        });
+        return empArray;
+      },
+      name: "selectEmployee",
+    },
+  ]);
+
+  const { newRole } = await inquier.prompt([
+    {
+      name: "newRole",
+      type: "number",
+      message: "What is their new role id number?",
+    },
+  ]);
+
+  connection.query(
+    "UPDATE employee SET ? WHERE ?",
+    [{ role_id: selectEmployee }, { id: newRole }],
+    (err) => {
+      if (err) throw err;
+    }
+  );
 };
