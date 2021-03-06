@@ -126,28 +126,54 @@ const addDepartment = () => {
       type: "input",
       message: "Please enter the name of the new department.",
     })
-    .then(
-      (answer = () => {
-        connection.query("INSERT INTO department SET ?", {
-          department_name: answer.departmentName,
-        });
-      })
-    );
+    .then((answer) => {
+      connection.query(
+        "INSERT INTO department SET ?",
+        {
+          name: answer.departmentName,
+        },
+        function (err, data) {
+          if (err) throw err;
+          connection.query("SELECT * FROM department", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+            startingChoices();
+          });
+        }
+      );
+    });
 };
 const addRole = () => {
   inquirer
-    .prompt({
-      name: "roleName",
-      type: "input",
-      message: "Please enter the name of the new role.",
-    })
-    .then(
-      (answers = () => {
-        connection.query("INSERT INTO role SET ?", {
-          role_name: answers.roleName,
-        });
-      })
-    );
+    .prompt([
+      {
+        name: "roleName",
+        type: "input",
+        message: "Please enter the name of the new role.",
+      },
+      {
+        name: "roleSalary",
+        type: "input",
+        message: "What is the salary for this role?",
+      },
+    ])
+    .then((answer) => {
+      connection.query(
+        "INSERT INTO role SET ?",
+        {
+          title: answer.roleName,
+          salary: answer.roleSalary,
+        },
+        function (err, data) {
+          if (err) throw err;
+          connection.query("SELECT * FROM role", function (err, data) {
+            if (err) throw err;
+            console.table(data);
+            startingChoices();
+          });
+        }
+      );
+    });
 };
 
 const view = () => {
