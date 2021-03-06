@@ -127,9 +127,9 @@ const addDepartment = () => {
       message: "Please enter the name of the new department.",
     })
     .then(
-      (answers = () => {
+      (answer = () => {
         connection.query("INSERT INTO department SET ?", {
-          department_name: answers.departmentName,
+          department_name: answer.departmentName,
         });
       })
     );

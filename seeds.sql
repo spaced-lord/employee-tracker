@@ -41,11 +41,11 @@ VALUES
 INSERT INTO employee
     (first_name, last_name, role_id, manager_id)
 VALUES
-    ("Zack", "Noe", 2, 1)
+    ("Zack", "Noe", 2, 1);
 INSERT INTO employee
     (first_name, last_name, role_id, manager_id)
 VALUES
-    ("Rich", "Eyre", 2, 4)
+    ("Rich", "Eyre", 2, 4);
 INSERT INTO employee
     (first_name, last_name, role_id, manager_id)
 VALUES
